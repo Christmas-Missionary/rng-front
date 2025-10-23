@@ -65,7 +65,7 @@ static inline void prng_write_le64(void * dst, uint64_t val) {
   #else
   // Byteshift write.
   uint8_t * d = (uint8_t *)dst;
-  for (size_t i = 0; i < 8; i++) {
+  for (uint32_t i = 0; i < 8; i++) {
     d[i] = (uint8_t)(val & 0xff);
     val >>= 8;
   }
@@ -81,14 +81,14 @@ static inline void prng_gen(prng_state * restrict state, uint8_t * restrict buf,
   for (size_t i = 0; i < size; i += 128) {
     // Write the current output block to state if it is not NULL
     if (buf != NULL) {
-      for (size_t j = 0; j < 16; j++) {
+      for (uint32_t j = 0; j < 16; j++) {
         prng_write_le64(b, state->output[j]);
         b += 8;
       }
     }
     // Similar to SSE, use fixed iteration loops to reduce code complexity
     // and allow the compiler more control over optimization.
-    for (size_t j = 0; j < 2; j++) {
+    for (uint32_t j = 0; j < 2; j++) {
       // I don't want to type this 15 times.
       uint64_t * s = &state->state[j * 8];  // 2 lanes
       uint64_t * o = &state->output[j * 4]; // 1 lane
@@ -96,7 +96,7 @@ static inline void prng_gen(prng_state * restrict state, uint8_t * restrict buf,
 
       // I apply the counter to s1,
       // since it is the one whose shift loses most entropy.
-      for (size_t k = 0; k < 4; k++) {
+      for (uint32_t k = 0; k < 4; k++) {
         s[k + 4] += state->counter[k];
       }
 
@@ -144,11 +144,11 @@ static inline void prng_gen(prng_state * restrict state, uint8_t * restrict buf,
       // { 5,6,7,0,1,2,3,4, 11,12,13,14,15,8,9,10 }
       const uint8_t shuf_offsets[16] = {2, 3, 0, 1, 5, 6, 7, 4,  // left
                                         3, 0, 1, 2, 6, 7, 4, 5}; // right
-      for (size_t k = 0; k < 8; k++) {
+      for (uint32_t k = 0; k < 8; k++) {
         t[k] = (s[shuf_offsets[k]] >> 32) | (s[shuf_offsets[k + 8]] << 32);
       }
 
-      for (size_t k = 0; k < 4; k++) {
+      for (uint32_t k = 0; k < 4; k++) {
         // SIMD does not support rotations. Shift is the next best thing to entangle
         // bits with other 64-bit positions. We must shift by an odd number so that
         // each bit reaches all 64-bit positions, not just half. We must lose bits
@@ -170,7 +170,7 @@ static inline void prng_gen(prng_state * restrict state, uint8_t * restrict buf,
     }
 
     // Merge together.
-    for (size_t j = 0; j < 4; j++) {
+    for (uint32_t j = 0; j < 4; j++) {
       // The second orthogonally grown piece evolving independently, XORed.
       state->output[j + 8] = state->state[j + 0] ^ state->state[j + 12];
       state->output[j + 12] = state->state[j + 8] ^ state->state[j + 4];
@@ -206,13 +206,13 @@ void prng_init(prng_state * restrict s, const uint64_t * seed) {
   // Diffuse first two seed elements in s0, then the last two. Same for s1.
   // We must keep half of the state unchanged so users cannot set a bad state.
   memcpy(s->state, phi, sizeof(phi));
-  for (size_t i = 0; i < 4; i++) {
+  for (uint32_t i = 0; i < 4; i++) {
     s->state[i * 2 + 0] ^= seed[i];           // { s0,0,s1,0,s2,0,s3,0 }
     s->state[i * 2 + 8] ^= seed[(i + 2) % 4]; // { s2,0,s3,0,s0,0,s1,0 }
   }
-  for (size_t i = 0; i < 13; i++) {
+  for (uint32_t i = 0; i < 13; i++) {
     prng_gen(s, NULL, 128);
-    for (size_t j = 0; j < 4; j++) {
+    for (uint32_t j = 0; j < 4; j++) {
       s->state[j + 0] = s->output[j + 12];
       s->state[j + 4] = s->output[j + 8];
       s->state[j + 8] = s->output[j + 4];

@@ -61,7 +61,7 @@ static inline void prng_gen(prng_state * restrict s, uint8_t * restrict buf, siz
   for (size_t i = 0; i < size; i += 128) {
     // Write the current output block to state if it is not NULL
     if (buf != NULL) {
-      for (size_t j = 0; j < 8; j++) {
+      for (uint32_t j = 0; j < 8; j++) {
         _mm_storeu_si128((__m128i *)&buf[i + (16 * j)], s->output[j]);
       }
     }
@@ -71,7 +71,7 @@ static inline void prng_gen(prng_state * restrict s, uint8_t * restrict buf, siz
     // Therefore, we use fixed iteration loops to reduce code complexity while
     // still allowing the compiler to easily unroll the loop.
     // We also try to keep variables active for as short as possible.
-    for (size_t j = 0; j < 2; j++) {
+    for (uint32_t j = 0; j < 2; j++) {
       __m128i s_lo, s_hi, u0_lo, u0_hi, u1_lo, u1_hi, t_lo, t_hi;
 
       // Lane 0
@@ -178,7 +178,7 @@ void prng_init(prng_state * restrict s, const uint64_t * seed) {
   s->state[6] = _mm_xor_si128(seed_0, _mm_loadu_si128((__m128i *)&phi[12]));
   s->state[7] = _mm_xor_si128(seed_1, _mm_loadu_si128((__m128i *)&phi[14]));
 
-  for (int i = 0; i < 13; i++) {
+  for (uint32_t i = 0; i < 13; i++) {
     prng_gen(s, NULL, 128);
     s->state[0] = s->output[6];
     s->state[1] = s->output[7];

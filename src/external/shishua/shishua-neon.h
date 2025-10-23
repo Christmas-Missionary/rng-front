@@ -42,14 +42,14 @@ static inline void prng_gen(prng_state * restrict s, uint8_t * restrict buf, siz
   for (size_t i = 0; i < size; i += 128) {
     // Write the current output block to state if it is not NULL
     if (buf != NULL) {
-      for (size_t j = 0; j < 8; j++) {
+      for (uint32_t j = 0; j < 8; j++) {
         vst1q_u8(b, vreinterpretq_u8_u64(s->output[j]));
         b += 16;
       }
     }
     // NEON has less register pressure than SSE2, but we reroll it anyways for
     // code size.
-    for (size_t j = 0; j < 2; j++) {
+    for (uint32_t j = 0; j < 2; j++) {
       uint64x2_t s0_lo = s->state[j * 4 + 0], s0_hi = s->state[j * 4 + 1], s1_lo = s->state[j * 4 + 2],
                  s1_hi = s->state[j * 4 + 3], t0_lo, t0_hi, t1_lo, t1_hi, u_lo, u_hi;
 
@@ -148,7 +148,7 @@ void prng_init(prng_state * restrict s, const uint64_t * seed) {
   s->state[6] = veorq_u64(seed_0, vld1q_u64(&phi[12]));
   s->state[7] = veorq_u64(seed_1, vld1q_u64(&phi[14]));
 
-  for (int i = 0; i < 13; i++) {
+  for (uint32_t i = 0; i < 13; i++) {
     prng_gen(s, NULL, 128);
     s->state[0] = s->output[6];
     s->state[1] = s->output[7];
