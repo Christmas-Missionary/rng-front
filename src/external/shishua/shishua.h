@@ -21,7 +21,10 @@
   //   shishua half scalar | 0.2496 ns/byte | 0.2911 ns/byte
   // Therefore, we only autoselect the NEON path on Clang, at least until GCC's
   // NEON codegen improves.
-  #elif (defined(__ARM_NEON) || defined(__ARM_NEON__)) && defined(__clang__)
+
+  // As of GCC 15.1.0, It is on par with Clang
+  // TODO: TEST ON MSVC
+  #elif (defined(__ARM_NEON) || defined(__ARM_NEON__)) && (defined(__clang__) || defined(__GNUC__))
     #define SHISHUA_TARGET SHISHUA_TARGET_NEON
   #else
     #define SHISHUA_TARGET SHISHUA_TARGET_SCALAR
