@@ -1,0 +1,39 @@
+---
+Checks:
+'
+abseil-*,
+altera-*,
+  -altera-unroll-loops,
+  -altera-struct-pack-align,
+android-*,
+boost-*,
+bugprone-*,
+cert-*,
+clang-analyzer-*,
+concurrency-*,
+cppcoreguidelines-*,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-macro-usage,
+darwin-*,
+fuchsia-*,
+google-*,
+  -google-objc-function-naming,
+  -google-runtime-int,
+hicpp-*,
+linuxkernel-*,
+llvm-*,
+misc-*,
+modernize-*,
+  -modernize-use-trailing-return-type,
+mpi-*,
+objc-*,
+openmp-*,
+performance-*,
+portability-*,
+readability-*,
+  -readability-magic-numbers,
+zircon-*,
+'
+
+CheckOptions:
+  readability-function-cognitive-complexity.IgnoreMacros: true
