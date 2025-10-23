@@ -163,8 +163,6 @@ void prng_init(prng_state * restrict s, const uint64_t * seed) {
   // is initially ignored.
   s->counter[0] = _mm_setzero_si128();
   s->counter[1] = _mm_setzero_si128();
-#define ROUNDS 13
-#define STEPS 1
   // Diffuse first two seed elements in s0, then the last two. Same for s1.
   // We must keep half of the state unchanged so users cannot set a bad state.
   __m128i seed_0 = SHISHUA_CVTSI64_SI128(seed[0]);
@@ -180,8 +178,8 @@ void prng_init(prng_state * restrict s, const uint64_t * seed) {
   s->state[6] = _mm_xor_si128(seed_0, _mm_loadu_si128((__m128i *)&phi[12]));
   s->state[7] = _mm_xor_si128(seed_1, _mm_loadu_si128((__m128i *)&phi[14]));
 
-  for (int i = 0; i < ROUNDS; i++) {
-    prng_gen(s, NULL, 128 * STEPS);
+  for (int i = 0; i < 13; i++) {
+    prng_gen(s, NULL, 128);
     s->state[0] = s->output[6];
     s->state[1] = s->output[7];
     s->state[2] = s->output[4];
@@ -191,8 +189,6 @@ void prng_init(prng_state * restrict s, const uint64_t * seed) {
     s->state[6] = s->output[0];
     s->state[7] = s->output[1];
   }
-#undef STEPS
-#undef ROUNDS
 }
 #undef SHISHUA_CVTSI64_SI128
 #undef SHISHUA_ALIGNR_EPI8

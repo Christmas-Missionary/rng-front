@@ -101,23 +101,19 @@ static uint64_t phi[16] = {
 
 void prng_init(prng_state * restrict s, const uint64_t * seed) {
   memset(s, 0, sizeof(prng_state));
-#define STEPS 1
-#define ROUNDS 13
-  uint8_t buf[128 * STEPS];
+  uint8_t buf[128];
   // Diffuse first two seed elements in s0, then the last two. Same for s1.
   // We must keep half of the state unchanged so users cannot set a bad state.
   s->state[0] = _mm256_set_epi64x(phi[3], phi[2] ^ seed[1], phi[1], phi[0] ^ seed[0]);
   s->state[1] = _mm256_set_epi64x(phi[7], phi[6] ^ seed[3], phi[5], phi[4] ^ seed[2]);
   s->state[2] = _mm256_set_epi64x(phi[11], phi[10] ^ seed[3], phi[9], phi[8] ^ seed[2]);
   s->state[3] = _mm256_set_epi64x(phi[15], phi[14] ^ seed[1], phi[13], phi[12] ^ seed[0]);
-  for (size_t i = 0; i < ROUNDS; i++) {
-    prng_gen(s, buf, 128 * STEPS);
+  for (size_t i = 0; i < 13; i++) {
+    prng_gen(s, buf, 128);
     s->state[0] = s->output[3];
     s->state[1] = s->output[2];
     s->state[2] = s->output[1];
     s->state[3] = s->output[0];
   }
-#undef STEPS
-#undef ROUNDS
 }
 #endif

@@ -133,8 +133,6 @@ static uint64_t phi[16] = {
 void prng_init(prng_state * restrict s, const uint64_t * seed) {
   s->counter[0] = vdupq_n_u64(0);
   s->counter[1] = vdupq_n_u64(0);
-#define ROUNDS 13
-#define STEPS 1
   // Diffuse first two seed elements in s0, then the last two. Same for s1.
   // We must keep half of the state unchanged so users cannot set a bad state.
   uint64x2_t seed_0 = SHISHUA_VSETQ_N_U64(seed[0], 0);
@@ -150,8 +148,8 @@ void prng_init(prng_state * restrict s, const uint64_t * seed) {
   s->state[6] = veorq_u64(seed_0, vld1q_u64(&phi[12]));
   s->state[7] = veorq_u64(seed_1, vld1q_u64(&phi[14]));
 
-  for (int i = 0; i < ROUNDS; i++) {
-    prng_gen(s, NULL, 128 * STEPS);
+  for (int i = 0; i < 13; i++) {
+    prng_gen(s, NULL, 128);
     s->state[0] = s->output[6];
     s->state[1] = s->output[7];
     s->state[2] = s->output[4];
@@ -161,8 +159,6 @@ void prng_init(prng_state * restrict s, const uint64_t * seed) {
     s->state[6] = s->output[0];
     s->state[7] = s->output[1];
   }
-#undef STEPS
-#undef ROUNDS
 }
 #undef SHISHUA_VSETQ_N_U64
 #undef SHISHUA_VEXTQ_U8

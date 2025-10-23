@@ -203,8 +203,6 @@ static uint64_t phi[16] = {
 
 void prng_init(prng_state * restrict s, const uint64_t * seed) {
   memset(s, 0, sizeof(prng_state));
-  #define STEPS 1
-  #define ROUNDS 13
   // Diffuse first two seed elements in s0, then the last two. Same for s1.
   // We must keep half of the state unchanged so users cannot set a bad state.
   memcpy(s->state, phi, sizeof(phi));
@@ -212,8 +210,8 @@ void prng_init(prng_state * restrict s, const uint64_t * seed) {
     s->state[i * 2 + 0] ^= seed[i];           // { s0,0,s1,0,s2,0,s3,0 }
     s->state[i * 2 + 8] ^= seed[(i + 2) % 4]; // { s2,0,s3,0,s0,0,s1,0 }
   }
-  for (size_t i = 0; i < ROUNDS; i++) {
-    prng_gen(s, NULL, 128 * STEPS);
+  for (size_t i = 0; i < 13; i++) {
+    prng_gen(s, NULL, 128);
     for (size_t j = 0; j < 4; j++) {
       s->state[j + 0] = s->output[j + 12];
       s->state[j + 4] = s->output[j + 8];
@@ -221,8 +219,6 @@ void prng_init(prng_state * restrict s, const uint64_t * seed) {
       s->state[j + 12] = s->output[j + 0];
     }
   }
-  #undef STEPS
-  #undef ROUNDS
 }
 #endif // SHISHUA_TARGET == SHISHUA_TARGET_SCALAR
 #endif // SHISHUA_SCALAR_H
