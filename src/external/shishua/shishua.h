@@ -52,13 +52,6 @@ typedef struct prng_state {
   uint64_t counter[4]; // 1 lane
 } prng_state;
 
-  // buf could technically alias with prng_state, according to the compiler.
-  #if defined(__GNUC__) || defined(_MSC_VER)
-    #define SHISHUA_RESTRICT __restrict
-  #else
-    #define SHISHUA_RESTRICT
-  #endif
-
 // Writes a 64-bit little endian integer to dst
 static inline void prng_write_le64(void * dst, uint64_t val) {
     // Define to write in native endianness with memcpy
@@ -77,7 +70,7 @@ static inline void prng_write_le64(void * dst, uint64_t val) {
 }
 
 // buf's size must be a multiple of 128 bytes.
-static inline void prng_gen(prng_state * SHISHUA_RESTRICT state, uint8_t * SHISHUA_RESTRICT buf, size_t size) {
+static inline void prng_gen(prng_state * restrict state, uint8_t * restrict buf, size_t size) {
   uint8_t * b = buf;
   // TODO: consider adding proper uneven write handling
   assert((size % 128 == 0) && "buf's size must be a multiple of 128 bytes.");
@@ -194,7 +187,6 @@ static inline void prng_gen(prng_state * SHISHUA_RESTRICT state, uint8_t * SHISH
     }
   }
 }
-  #undef SHISHUA_RESTRICT
 
 // Nothing up my sleeve: those are the hex digits of Φ,
 // the least approximable irrational number.
@@ -206,7 +198,7 @@ static uint64_t phi[16] = {
   0x626E33B8D04B4331, 0xBBF73C790D94F79D, 0x471C4AB3ED3D82A5, 0xFEC507705E4AE6E5,
 };
 
-void prng_init(prng_state * s, uint64_t seed[4]) {
+void prng_init(prng_state * restrict s, const uint64_t * seed) {
   memset(s, 0, sizeof(prng_state));
   #define STEPS 1
   #define ROUNDS 13

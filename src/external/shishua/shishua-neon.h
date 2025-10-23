@@ -21,15 +21,8 @@ typedef struct prng_state {
 #define SHISHUA_VEXTQ_U8(Rn, Rm, Imm)                                                       \
   vreinterpretq_u64_u8(vextq_u8(vreinterpretq_u8_u64(Rn), vreinterpretq_u8_u64(Rm), (Imm)))
 
-// buf could technically alias with prng_state, according to the compiler.
-#if defined(__GNUC__) || defined(_MSC_VER)
-  #define SHISHUA_RESTRICT __restrict
-#else
-  #define SHISHUA_RESTRICT
-#endif
-
 // buf's size must be a multiple of 128 bytes.
-static inline void prng_gen(prng_state * SHISHUA_RESTRICT s, uint8_t * SHISHUA_RESTRICT buf, size_t size) {
+static inline void prng_gen(prng_state * restrict s, uint8_t * restrict buf, size_t size) {
   uint8_t * b = buf;
   uint64x2_t counter_lo = s->counter[0], counter_hi = s->counter[1];
   // The counter is not necessary to beat PractRand.
@@ -137,7 +130,7 @@ static uint64_t phi[16] = {
   0x626E33B8D04B4331, 0xBBF73C790D94F79D, 0x471C4AB3ED3D82A5, 0xFEC507705E4AE6E5,
 };
 
-void prng_init(prng_state * s, uint64_t seed[4]) {
+void prng_init(prng_state * restrict s, const uint64_t * seed) {
   s->counter[0] = vdupq_n_u64(0);
   s->counter[1] = vdupq_n_u64(0);
 #define ROUNDS 13
@@ -173,5 +166,4 @@ void prng_init(prng_state * s, uint64_t seed[4]) {
 }
 #undef SHISHUA_VSETQ_N_U64
 #undef SHISHUA_VEXTQ_U8
-#undef SHISHUA_RESTRICT
 #endif

@@ -38,15 +38,8 @@ typedef struct prng_state {
   #define SHISHUA_CVTSI64_SI128(x) SHISHUA_SET_EPI64X(0, x)
 #endif
 
-// buf could technically alias with prng_state, according to the compiler.
-#if defined(__GNUC__) || defined(_MSC_VER)
-  #define SHISHUA_RESTRICT __restrict
-#else
-  #define SHISHUA_RESTRICT
-#endif
-
 // buf's size must be a multiple of 128 bytes.
-static inline void prng_gen(prng_state * SHISHUA_RESTRICT s, uint8_t * SHISHUA_RESTRICT buf, size_t size) {
+static inline void prng_gen(prng_state * restrict s, uint8_t * restrict buf, size_t size) {
   __m128i counter_lo = s->counter[0], counter_hi = s->counter[1];
   // The counter is not necessary to beat PractRand.
   // It sets a lower bound of 2^71 bytes = 2 ZiB to the period,
@@ -165,7 +158,7 @@ static uint64_t phi[16] = {
   0x626E33B8D04B4331, 0xBBF73C790D94F79D, 0x471C4AB3ED3D82A5, 0xFEC507705E4AE6E5,
 };
 
-void prng_init(prng_state * s, uint64_t seed[4]) {
+void prng_init(prng_state * restrict s, const uint64_t * seed) {
   // Note: output is uninitialized at first, but since we pass NULL, its value
   // is initially ignored.
   s->counter[0] = _mm_setzero_si128();
@@ -204,5 +197,4 @@ void prng_init(prng_state * s, uint64_t seed[4]) {
 #undef SHISHUA_CVTSI64_SI128
 #undef SHISHUA_ALIGNR_EPI8
 #undef SHISHUA_SET_EPI64X
-#undef SHISHUA_RESTRICT
 #endif

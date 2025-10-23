@@ -12,7 +12,7 @@ typedef struct prng_state {
 } prng_state;
 
 // buf's size must be a multiple of 128 bytes.
-static inline void prng_gen(prng_state * s, uint8_t buf[], size_t size) {
+static inline void prng_gen(prng_state * restrict s, uint8_t * restrict buf, size_t size) {
   __m256i o0 = s->output[0], o1 = s->output[1], o2 = s->output[2], o3 = s->output[3], s0 = s->state[0],
           s1 = s->state[1], s2 = s->state[2], s3 = s->state[3], t0, t1, t2, t3, u0, u1, u2, u3, counter = s->counter;
   // The following shuffles move weak (low-diffusion) 32-bit parts of 64-bit
@@ -99,7 +99,7 @@ static uint64_t phi[16] = {
   0x626E33B8D04B4331, 0xBBF73C790D94F79D, 0x471C4AB3ED3D82A5, 0xFEC507705E4AE6E5,
 };
 
-void prng_init(prng_state * s, uint64_t seed[4]) {
+void prng_init(prng_state * restrict s, const uint64_t * seed) {
   memset(s, 0, sizeof(prng_state));
 #define STEPS 1
 #define ROUNDS 13
