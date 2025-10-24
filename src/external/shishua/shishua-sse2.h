@@ -6,7 +6,7 @@
 // Consider the half version if AVX2 is not available.
 #ifndef SHISHUA_SSE2_H
 #define SHISHUA_SSE2_H
-#include <assert.h>
+#include "../custom-errors/custom_errors.h"
 #include <stddef.h>
 #include <stdint.h>
 // Note: cl.exe doesn't define __SSSE3__
@@ -39,7 +39,15 @@ typedef struct prng_state {
 #endif
 
 // buf's size must be a multiple of 128 bytes.
-static inline void prng_gen(prng_state * restrict s, uint8_t * restrict buf, size_t size) {
+static inline void prng_gen(prng_state * restrict s, uint8_t * restrict buf, const size_t size) {
+  CE_ERROR(s != NULL, "prng_state is NULL!");
+  CE_ERROR(s->state != NULL, "state state is NULL!");
+  CE_ERROR(s->output != NULL, "state output is NULL!");
+  CE_ERROR(s->counter != NULL, "state counter is NULL!");
+  CE_ERROR(buf != NULL, "buf is NULL!");
+  CE_ERROR(size % 128 == 0, "buf's size must be a multiple of 128 bytes.");
+  CE_WARN(size > 0, "Nothing to generate!");
+
   __m128i counter_lo = s->counter[0], counter_hi = s->counter[1];
   // The counter is not necessary to beat PractRand.
   // It sets a lower bound of 2^71 bytes = 2 ZiB to the period,
@@ -54,10 +62,6 @@ static inline void prng_gen(prng_state * restrict s, uint8_t * restrict buf, siz
   // increment = { 7, 5, 3, 1 };
   __m128i increment_lo = SHISHUA_SET_EPI64X(5, 7);
   __m128i increment_hi = SHISHUA_SET_EPI64X(1, 3);
-
-  // TODO: consider adding proper uneven write handling
-  assert((size % 128 == 0) && "buf's size must be a multiple of 128 bytes.");
-  assert(s != NULL && "prng_state is NULL!");
 
   for (size_t i = 0; i < size; i += 128) {
     for (uint32_t j = 0; j < 8; j++) {
@@ -147,8 +151,12 @@ static inline void prng_gen(prng_state * restrict s, uint8_t * restrict buf, siz
 }
 
 void prng_init(prng_state * restrict s, const uint64_t * seed) {
-  // Note: output is uninitialized at first, but since we pass NULL, its value
-  // is initially ignored.
+  CE_ERROR(s != NULL, "prng_state is NULL!");
+  CE_ERROR(s->state != NULL, "state state is NULL!");
+  CE_ERROR(s->output != NULL, "state output is NULL!");
+  CE_ERROR(s->counter != NULL, "state counter is NULL!");
+  CE_ERROR(seed != NULL, "seed is NULL!");
+
   s->counter[0] = _mm_setzero_si128();
   s->counter[1] = _mm_setzero_si128();
   // Diffuse first two seed elements in s0, then the last two. Same for s1.

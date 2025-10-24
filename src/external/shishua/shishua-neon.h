@@ -1,8 +1,8 @@
 // An ARM NEON version of shishua.
 #ifndef SHISHUA_NEON_H
 #define SHISHUA_NEON_H
+#include "../custom-errors/custom_errors.h"
 #include <arm_neon.h>
-#include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -23,6 +23,14 @@ typedef struct prng_state {
 
 // buf's size must be a multiple of 128 bytes.
 static inline void prng_gen(prng_state * restrict s, uint8_t * restrict buf, size_t size) {
+  CE_ERROR(s != NULL, "prng_state is NULL!");
+  CE_ERROR(s->state != NULL, "state state is NULL!");
+  CE_ERROR(s->output != NULL, "state output is NULL!");
+  CE_ERROR(s->counter != NULL, "state counter is NULL!");
+  CE_ERROR(buf != NULL, "buf is NULL!");
+  CE_ERROR(size % 128 == 0, "buf's size must be a multiple of 128 bytes.");
+  CE_WARN(size > 0, "Nothing to generate!");
+
   uint64x2_t counter_lo = s->counter[0], counter_hi = s->counter[1];
   // The counter is not necessary to beat PractRand.
   // It sets a lower bound of 2^71 bytes = 2 ZiB to the period,
@@ -35,9 +43,6 @@ static inline void prng_gen(prng_state * restrict s, uint8_t * restrict buf, siz
   // I used the smallest odd numbers to avoid having a magic number.
   uint64x2_t increment_lo = SHISHUA_VSETQ_N_U64(7, 5);
   uint64x2_t increment_hi = SHISHUA_VSETQ_N_U64(3, 1);
-  // TODO: consider adding proper uneven write handling
-  assert((size % 128 == 0) && "buf's size must be a multiple of 128 bytes.");
-  assert((buf != NULL) && "buf is NULL!");
 
   for (size_t i = 0; i < size; i += 128) {
     for (uint32_t j = 0; j < 8; j++) {
@@ -119,6 +124,12 @@ static inline void prng_gen(prng_state * restrict s, uint8_t * restrict buf, siz
 }
 
 void prng_init(prng_state * restrict s, const uint64_t * seed) {
+  CE_ERROR(s != NULL, "prng_state is NULL!");
+  CE_ERROR(s->state != NULL, "state state is NULL!");
+  CE_ERROR(s->output != NULL, "state output is NULL!");
+  CE_ERROR(s->counter != NULL, "state counter is NULL!");
+  CE_ERROR(seed != NULL, "seed is NULL!");
+
   s->counter[0] = vdupq_n_u64(0);
   s->counter[1] = vdupq_n_u64(0);
   // Diffuse first two seed elements in s0, then the last two. Same for s1.

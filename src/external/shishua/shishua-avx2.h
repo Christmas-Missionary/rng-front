@@ -1,6 +1,6 @@
 #ifndef SHISHUA_AVX2_H
 #define SHISHUA_AVX2_H
-#include <assert.h>
+#include "../custom-errors/custom_errors.h"
 #include <immintrin.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -13,6 +13,13 @@ typedef struct prng_state {
 
 // buf's size must be a multiple of 128 bytes.
 static inline void prng_gen(prng_state * restrict s, uint8_t * restrict buf, size_t size) {
+  CE_ERROR(s != NULL, "prng_state is NULL!");
+  CE_ERROR(s->state != NULL, "state state is NULL!");
+  CE_ERROR(s->output != NULL, "state output is NULL!");
+  CE_ERROR(buf != NULL, "buf is NULL!");
+  CE_ERROR(size % 128 == 0, "buf's size must be a multiple of 128 bytes.");
+  CE_WARN(size > 0, "Nothing to generate!");
+
   __m256i o0 = s->output[0], o1 = s->output[1], o2 = s->output[2], o3 = s->output[3], s0 = s->state[0],
           s1 = s->state[1], s2 = s->state[2], s3 = s->state[3], t0, t1, t2, t3, u0, u1, u2, u3, counter = s->counter;
   // The following shuffles move weak (low-diffusion) 32-bit parts of 64-bit
@@ -32,10 +39,6 @@ static inline void prng_gen(prng_state * restrict s, uint8_t * restrict buf, siz
   // for a tiny amount of variation stirring.
   // I used the smallest odd numbers to avoid having a magic number.
   __m256i increment = _mm256_set_epi64x(1, 3, 5, 7);
-
-  // TODO: consider adding proper uneven write handling
-  assert((size % 128 == 0) && "buf's size must be a multiple of 128 bytes.");
-  assert((buf != NULL) && "buf is NULL!");
 
   for (size_t i = 0; i < size; i += 128) {
     _mm256_storeu_si256((__m256i *)&buf[i + 0], o0);
@@ -90,6 +93,11 @@ static inline void prng_gen(prng_state * restrict s, uint8_t * restrict buf, siz
 }
 
 void prng_init(prng_state * restrict s, const uint64_t * seed) {
+  CE_ERROR(s != NULL, "prng_state is NULL!");
+  CE_ERROR(s->state != NULL, "state state is NULL!");
+  CE_ERROR(s->output != NULL, "state output is NULL!");
+  CE_ERROR(seed != NULL, "seed is NULL!");
+
   memset(s, 0, sizeof(prng_state));
   // Diffuse first two seed elements in s0, then the last two. Same for s1.
   // We must keep half of the state unchanged so users cannot set a bad state.

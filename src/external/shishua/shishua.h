@@ -43,7 +43,7 @@
 
   // Portable scalar implementation of shishua.
   // Designed to balance performance and code size.
-  #include <assert.h>
+  #include "../custom-errors/custom_errors.h"
   #include <stddef.h>
   #include <stdint.h>
   #include <string.h>
@@ -73,10 +73,14 @@ static inline void prng_write_le64(void * dst, uint64_t val) {
 }
 
 // buf's size must be a multiple of 128 bytes.
-static inline void prng_gen(prng_state * restrict state, uint8_t * restrict buf, size_t size) {
-  // TODO: consider adding proper uneven write handling
-  assert((size % 128 == 0) && "buf's size must be a multiple of 128 bytes.");
-  assert((buf != NULL) && "buf is NULL!");
+static inline void prng_gen(prng_state * restrict state, uint8_t * restrict buf, const size_t size) {
+  CE_ERROR(state != NULL, "prng_state is NULL!");
+  CE_ERROR(state->state != NULL, "state state is NULL!");
+  CE_ERROR(state->output != NULL, "state output is NULL!");
+  CE_ERROR(state->counter != NULL, "state counter is NULL!");
+  CE_ERROR(buf != NULL, "buf is NULL!");
+  CE_ERROR(size % 128 == 0, "buf's size must be a multiple of 128 bytes.");
+  CE_WARN(size > 0, "Nothing to generate!");
 
   for (size_t i = 0; i < size; i += 128) {
     for (uint32_t j = 0; j < 16; j++) {
@@ -189,6 +193,12 @@ static inline void prng_gen(prng_state * restrict state, uint8_t * restrict buf,
 }
 
 void prng_init(prng_state * restrict s, const uint64_t * seed) {
+  CE_ERROR(s != NULL, "prng_state is NULL!");
+  CE_ERROR(s->state != NULL, "state state is NULL!");
+  CE_ERROR(s->output != NULL, "state output is NULL!");
+  CE_ERROR(s->counter != NULL, "state counter is NULL!");
+  CE_ERROR(seed != NULL, "seed is NULL!");
+
   memset(s, 0, sizeof(prng_state));
   // Diffuse first two seed elements in s0, then the last two. Same for s1.
   // We must keep half of the state unchanged so users cannot set a bad state.
