@@ -57,23 +57,6 @@ typedef struct prng_state {
   uint64_t counter[4]; // 1 lane
 } prng_state;
 
-// Writes a 64-bit little endian integer to dst
-static inline void prng_write_le64(void * dst, uint64_t val) {
-    // Define to write in native endianness with memcpy
-    // Also, use memcpy on known little endian setups.
-  #if defined(SHISHUA_NATIVE_ENDIAN) || defined(_WIN32) ||                                               \
-    (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined(__LITTLE_ENDIAN__)
-  memcpy(dst, &val, sizeof(uint64_t));
-  #else
-  // Byteshift write.
-  uint8_t * d = (uint8_t *)dst;
-  for (uint32_t i = 0; i < 8; i++) {
-    d[i] = (uint8_t)(val & 0xff);
-    val >>= 8;
-  }
-  #endif
-}
-
 // buf's size must be a multiple of 128 bytes.
 static inline void prng_gen(prng_state * restrict state, uint8_t * restrict buf, const size_t size) {
   CE_ERROR(state != NULL, "prng_state is NULL!");
@@ -86,7 +69,20 @@ static inline void prng_gen(prng_state * restrict state, uint8_t * restrict buf,
 
   for (size_t i = 0; i < size; i += 128) {
     for (uint32_t j = 0; j < 16; j++) {
-      prng_write_le64(buf, state->output[j]);
+  // Writes a 64-bit little endian integer to buf
+  // Define to write in native endianness with memcpy
+  // Also, use memcpy on known little endian setups.
+  #if defined(SHISHUA_NATIVE_ENDIAN) || defined(_WIN32) ||                                               \
+    (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined(__LITTLE_ENDIAN__)
+      memcpy(buf, &(state->output[j]), sizeof(uint64_t));
+  #else
+      // Byteshift write.
+      uint64_t val = state->output[j];
+      for (uint32_t i = 0; i < 8; i++) {
+        buf[i] = (uint8_t)(val & 0xff);
+        val >>= 8;
+      }
+  #endif
       buf += 8;
     }
     // Similar to SSE, use fixed iteration loops to reduce code complexity
