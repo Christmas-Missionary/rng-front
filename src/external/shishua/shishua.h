@@ -188,20 +188,20 @@ static inline void prng_gen(prng_state * restrict state, uint8_t * restrict buf,
   }
 }
 
-// Nothing up my sleeve: those are the hex digits of Φ,
-// the least approximable irrational number.
-// $ echo 'scale=310;obase=16;(sqrt(5)-1)/2' | bc
-static uint64_t phi[16] = {
-  0x9E3779B97F4A7C15, 0xF39CC0605CEDC834, 0x1082276BF3A27251, 0xF86C6A11D0C18E95,
-  0x2767F0B153D27B7F, 0x0347045B5BF1827F, 0x01886F0928403002, 0xC1D64BA40F335E36,
-  0xF06AD7AE9717877E, 0x85839D6EFFBD7DC6, 0x64D325D1C5371682, 0xCADD0CCCFDFFBBE1,
-  0x626E33B8D04B4331, 0xBBF73C790D94F79D, 0x471C4AB3ED3D82A5, 0xFEC507705E4AE6E5,
-};
-
 void prng_init(prng_state * restrict s, const uint64_t * seed) {
   memset(s, 0, sizeof(prng_state));
   // Diffuse first two seed elements in s0, then the last two. Same for s1.
   // We must keep half of the state unchanged so users cannot set a bad state.
+
+  // Nothing up my sleeve: those are the hex digits of Φ,
+  // the least approximable irrational number.
+  // $ echo 'scale=310;obase=16;(sqrt(5)-1)/2' | bc
+  const uint64_t phi[16] = {
+    0x9E3779B97F4A7C15, 0xF39CC0605CEDC834, 0x1082276BF3A27251, 0xF86C6A11D0C18E95,
+    0x2767F0B153D27B7F, 0x0347045B5BF1827F, 0x01886F0928403002, 0xC1D64BA40F335E36,
+    0xF06AD7AE9717877E, 0x85839D6EFFBD7DC6, 0x64D325D1C5371682, 0xCADD0CCCFDFFBBE1,
+    0x626E33B8D04B4331, 0xBBF73C790D94F79D, 0x471C4AB3ED3D82A5, 0xFEC507705E4AE6E5,
+  };
   memcpy(s->state, phi, sizeof(phi));
   for (uint32_t i = 0; i < 4; i++) {
     s->state[i * 2 + 0] ^= seed[i];           // { s0,0,s1,0,s2,0,s3,0 }

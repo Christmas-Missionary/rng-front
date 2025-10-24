@@ -146,16 +146,6 @@ static inline void prng_gen(prng_state * restrict s, uint8_t * restrict buf, siz
   s->counter[1] = counter_hi;
 }
 
-// Nothing up my sleeve: those are the hex digits of Φ,
-// the least approximable irrational number.
-// $ echo 'scale=310;obase=16;(sqrt(5)-1)/2' | bc
-static uint64_t phi[16] = {
-  0x9E3779B97F4A7C15, 0xF39CC0605CEDC834, 0x1082276BF3A27251, 0xF86C6A11D0C18E95,
-  0x2767F0B153D27B7F, 0x0347045B5BF1827F, 0x01886F0928403002, 0xC1D64BA40F335E36,
-  0xF06AD7AE9717877E, 0x85839D6EFFBD7DC6, 0x64D325D1C5371682, 0xCADD0CCCFDFFBBE1,
-  0x626E33B8D04B4331, 0xBBF73C790D94F79D, 0x471C4AB3ED3D82A5, 0xFEC507705E4AE6E5,
-};
-
 void prng_init(prng_state * restrict s, const uint64_t * seed) {
   // Note: output is uninitialized at first, but since we pass NULL, its value
   // is initially ignored.
@@ -167,6 +157,14 @@ void prng_init(prng_state * restrict s, const uint64_t * seed) {
   __m128i seed_1 = SHISHUA_CVTSI64_SI128(seed[1]);
   __m128i seed_2 = SHISHUA_CVTSI64_SI128(seed[2]);
   __m128i seed_3 = SHISHUA_CVTSI64_SI128(seed[3]);
+
+  const uint64_t phi[16] = {
+    0x9E3779B97F4A7C15, 0xF39CC0605CEDC834, 0x1082276BF3A27251, 0xF86C6A11D0C18E95,
+    0x2767F0B153D27B7F, 0x0347045B5BF1827F, 0x01886F0928403002, 0xC1D64BA40F335E36,
+    0xF06AD7AE9717877E, 0x85839D6EFFBD7DC6, 0x64D325D1C5371682, 0xCADD0CCCFDFFBBE1,
+    0x626E33B8D04B4331, 0xBBF73C790D94F79D, 0x471C4AB3ED3D82A5, 0xFEC507705E4AE6E5,
+  };
+
   s->state[0] = _mm_xor_si128(seed_0, _mm_loadu_si128((__m128i *)&phi[0]));
   s->state[1] = _mm_xor_si128(seed_1, _mm_loadu_si128((__m128i *)&phi[2]));
   s->state[2] = _mm_xor_si128(seed_2, _mm_loadu_si128((__m128i *)&phi[4]));
