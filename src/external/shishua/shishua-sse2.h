@@ -57,13 +57,11 @@ static inline void prng_gen(prng_state * restrict s, uint8_t * restrict buf, siz
 
   // TODO: consider adding proper uneven write handling
   assert((size % 128 == 0) && "buf's size must be a multiple of 128 bytes.");
+  assert(s != NULL && "prng_state is NULL!");
 
   for (size_t i = 0; i < size; i += 128) {
-    // Write the current output block to state if it is not NULL
-    if (buf != NULL) {
-      for (uint32_t j = 0; j < 8; j++) {
-        _mm_storeu_si128((__m128i *)&buf[i + (16 * j)], s->output[j]);
-      }
+    for (uint32_t j = 0; j < 8; j++) {
+      _mm_storeu_si128((__m128i *)&buf[i + (16 * j)], s->output[j]);
     }
 
     // There are only 16 SSE registers (8 on i686), and we have to account for
@@ -178,8 +176,9 @@ void prng_init(prng_state * restrict s, const uint64_t * seed) {
   s->state[6] = _mm_xor_si128(seed_0, _mm_loadu_si128((__m128i *)&phi[12]));
   s->state[7] = _mm_xor_si128(seed_1, _mm_loadu_si128((__m128i *)&phi[14]));
 
+  uint8_t buf[128];
   for (uint32_t i = 0; i < 13; i++) {
-    prng_gen(s, NULL, 128);
+    prng_gen(s, buf, 128);
     s->state[0] = s->output[6];
     s->state[1] = s->output[7];
     s->state[2] = s->output[4];

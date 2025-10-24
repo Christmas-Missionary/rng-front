@@ -23,7 +23,6 @@ typedef struct prng_state {
 
 // buf's size must be a multiple of 128 bytes.
 static inline void prng_gen(prng_state * restrict s, uint8_t * restrict buf, size_t size) {
-  uint8_t * b = buf;
   uint64x2_t counter_lo = s->counter[0], counter_hi = s->counter[1];
   // The counter is not necessary to beat PractRand.
   // It sets a lower bound of 2^71 bytes = 2 ZiB to the period,
@@ -38,15 +37,14 @@ static inline void prng_gen(prng_state * restrict s, uint8_t * restrict buf, siz
   uint64x2_t increment_hi = SHISHUA_VSETQ_N_U64(3, 1);
   // TODO: consider adding proper uneven write handling
   assert((size % 128 == 0) && "buf's size must be a multiple of 128 bytes.");
+  assert((buf != NULL) && "buf is NULL!");
 
   for (size_t i = 0; i < size; i += 128) {
-    // Write the current output block to state if it is not NULL
-    if (buf != NULL) {
-      for (uint32_t j = 0; j < 8; j++) {
-        vst1q_u8(b, vreinterpretq_u8_u64(s->output[j]));
-        b += 16;
-      }
+    for (uint32_t j = 0; j < 8; j++) {
+      vst1q_u8(buf, vreinterpretq_u8_u64(s->output[j]));
+      buf += 16;
     }
+
     // NEON has less register pressure than SSE2, but we reroll it anyways for
     // code size.
     for (uint32_t j = 0; j < 2; j++) {
@@ -148,8 +146,9 @@ void prng_init(prng_state * restrict s, const uint64_t * seed) {
   s->state[6] = veorq_u64(seed_0, vld1q_u64(&phi[12]));
   s->state[7] = veorq_u64(seed_1, vld1q_u64(&phi[14]));
 
+  uint8_t buf[128];
   for (uint32_t i = 0; i < 13; i++) {
-    prng_gen(s, NULL, 128);
+    prng_gen(s, buf, 128);
     s->state[0] = s->output[6];
     s->state[1] = s->output[7];
     s->state[2] = s->output[4];

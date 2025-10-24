@@ -74,17 +74,14 @@ static inline void prng_write_le64(void * dst, uint64_t val) {
 
 // buf's size must be a multiple of 128 bytes.
 static inline void prng_gen(prng_state * restrict state, uint8_t * restrict buf, size_t size) {
-  uint8_t * b = buf;
   // TODO: consider adding proper uneven write handling
   assert((size % 128 == 0) && "buf's size must be a multiple of 128 bytes.");
+  assert((buf != NULL) && "buf is NULL!");
 
   for (size_t i = 0; i < size; i += 128) {
-    // Write the current output block to state if it is not NULL
-    if (buf != NULL) {
-      for (uint32_t j = 0; j < 16; j++) {
-        prng_write_le64(b, state->output[j]);
-        b += 8;
-      }
+    for (uint32_t j = 0; j < 16; j++) {
+      prng_write_le64(buf, state->output[j]);
+      buf += 8;
     }
     // Similar to SSE, use fixed iteration loops to reduce code complexity
     // and allow the compiler more control over optimization.
@@ -210,8 +207,9 @@ void prng_init(prng_state * restrict s, const uint64_t * seed) {
     s->state[i * 2 + 0] ^= seed[i];           // { s0,0,s1,0,s2,0,s3,0 }
     s->state[i * 2 + 8] ^= seed[(i + 2) % 4]; // { s2,0,s3,0,s0,0,s1,0 }
   }
+  uint8_t buf[128];
   for (uint32_t i = 0; i < 13; i++) {
-    prng_gen(s, NULL, 128);
+    prng_gen(s, buf, 128);
     for (uint32_t j = 0; j < 4; j++) {
       s->state[j + 0] = s->output[j + 12];
       s->state[j + 4] = s->output[j + 8];
