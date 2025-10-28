@@ -1,6 +1,6 @@
 #include "../external/custom-errors/custom_errors.h"
 #include "../external/shishua/shishua.h"
-#include "../external/stb/stb_image_write.h"
+#include "external/stb/stb_image_write.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
