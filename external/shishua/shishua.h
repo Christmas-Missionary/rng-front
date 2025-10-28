@@ -31,7 +31,7 @@
   #endif
 #endif
 
-#include "../../restrict.hpp"
+#include "../restrict.hpp"
 
 // These are all optional, with defining SHISHUA_TARGET_SCALAR, you only
 // need this header.

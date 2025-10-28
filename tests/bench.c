@@ -1,4 +1,4 @@
-#include "../src/external/shishua/shishua.h"
+#include "../external/shishua/shishua.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <time.h>
