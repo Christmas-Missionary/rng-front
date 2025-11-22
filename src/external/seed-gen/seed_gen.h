@@ -6,6 +6,7 @@ Copyright (c) 2025 Christmas_Missionary - BSD Zero Clause License
 #define SG_SEED_GEN_QJD
 
 #include <stddef.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,6 +21,8 @@ typedef enum sg_error {
 } sg_error;
 
 sg_error sg_generate_seed(void * dst, size_t size);
+
+sg_error sg_get_time(int64_t dst[static 2]);
 
 #ifdef __cplusplus
 }

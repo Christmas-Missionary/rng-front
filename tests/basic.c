@@ -26,6 +26,13 @@ static inline uint32_t merge_four_bytes(const uint8_t * buf) {
 }
 
 int main(void) {
+  int64_t time_buf[2] = {0};
+  if (sg_get_time(time_buf) != SG_SUCCESS) {
+    printf("Can't get time!\n");
+    return 2;
+  }
+  printf("The values from the time are: %lld and %lld\n", time_buf[0], time_buf[1]);
+
   uint8_t buf[BUFFER_SIZE] = {0};
   prng_state state = {0};
   uint64_t shishua_seed[4] = {0};
