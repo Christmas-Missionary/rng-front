@@ -167,7 +167,7 @@ LICENSE
   #endif
 
   #ifndef STBI_WRITE_NO_STDIO
-STBIWDEF int stbi_write_bmp(char const * filename, int w, int h, int comp, const void * data);
+STBIWDEF int stbi_write_bmp(char const * filename, int w, int h, int comp, void * data);
 
     #ifdef STBIW_WINDOWS_UTF8
 STBIWDEF int stbiw_convert_wchar_to_utf8(char * buffer, size_t bufferlen, const wchar_t * input);
@@ -218,7 +218,7 @@ static void stbi__start_write_callbacks(stbi__write_context * s, stbi_write_func
 #ifndef STBI_WRITE_NO_STDIO
 
 static void stbi__stdio_write(void * context, void * data, int size) {
-  fwrite(data, 1, size, (FILE *)context);
+  fwrite(data, 1, (size_t)size, (FILE *)context);
 }
 
   #if defined(_WIN32) && defined(STBIW_WINDOWS_UTF8)
@@ -366,6 +366,8 @@ static void stbiw__write_pixel(stbi__write_context * s, int rgb_dir, int comp, i
     case 3:
       stbiw__write3(s, d[1 - rgb_dir], d[1], d[1 + rgb_dir]);
       break;
+    default:
+      break;
   }
   if (write_alpha > 0)
     stbiw__write1(s, d[comp - 1]);
@@ -411,11 +413,11 @@ static int stbiw__outfile(stbi__write_context * s, int rgb_dir, int vdir, int x,
   }
 }
 
-static int stbi_write_bmp_core(stbi__write_context * s, int x, int y, int comp, const void * data) {
+static int stbi_write_bmp_core(stbi__write_context * s, int x, int y, int comp, void * data) {
   if (comp != 4) {
     // write RGB bitmap
     int pad = (-x * 3) & 3;
-    return stbiw__outfile(s, -1, -1, x, y, comp, 1, (void *)data, 0, pad,
+    return stbiw__outfile(s, -1, -1, x, y, comp, 1, data, 0, pad,
                           "11 4 22 4"
                           "4 44 22 444444",
                           'B', 'M', 14 + 40 + (x * 3 + pad) * y, 0, 0, 14 + 40, // file header
@@ -424,7 +426,7 @@ static int stbi_write_bmp_core(stbi__write_context * s, int x, int y, int comp, 
     // RGBA bitmaps need a v4 header
     // use BI_BITFIELDS mode with 32bpp and alpha mask
     // (straight BI_RGB with alpha mask doesn't work in most readers)
-    return stbiw__outfile(s, -1, -1, x, y, comp, 1, (void *)data, 1, 0,
+    return stbiw__outfile(s, -1, -1, x, y, comp, 1, data, 1, 0,
                           "11 4 22 4"
                           "4 44 22 444444 4444 4 444 444 444 444",
                           'B', 'M', 14 + 108 + x * y * 4, 0, 0, 14 + 108, // file header
@@ -434,7 +436,7 @@ static int stbi_write_bmp_core(stbi__write_context * s, int x, int y, int comp, 
 }
 
 #ifndef STBI_WRITE_NO_STDIO
-STBIWDEF int stbi_write_bmp(char const * filename, int x, int y, int comp, const void * data) {
+STBIWDEF int stbi_write_bmp(char const * filename, int x, int y, int comp, void * data) {
   stbi__write_context s = {0};
   if (stbi__start_write_file(&s, filename)) {
     int r = stbi_write_bmp_core(&s, x, y, comp, data);

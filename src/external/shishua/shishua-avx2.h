@@ -92,7 +92,7 @@ static inline void prng_gen(prng_state * restrict s, uint8_t * restrict buf, siz
   s->counter = counter;
 }
 
-void prng_init(prng_state * restrict s, const uint64_t * seed) {
+static void prng_init(prng_state * restrict s, const uint64_t * seed) {
   CE_ERROR(s != NULL, "prng_state is NULL!");
   CE_ERROR(s->state != NULL, "state state is NULL!");
   CE_ERROR(s->output != NULL, "state output is NULL!");
