@@ -25,7 +25,7 @@ sg_error sg_generate_seed(void * dst, size_t size) {
   }
   NTSTATUS status = BCryptGenRandom(BCRYPT_RNG_ALG_HANDLE, dst, size, 0);
   if (!BCRYPT_SUCCESS(status)) {
-    // CE_FATAL(0, "Not all bytes were generated upon request!");
+    CE_FATAL(0, "Not all bytes were generated upon request!");
     return SG_ERROR_DURING_GEN;
   }
   return SG_SUCCESS;
@@ -44,17 +44,17 @@ sg_error sg_generate_seed(void * dst, size_t size) {
   }
   FILE * file = fopen("/dev/urandom", "rb");
   if (file == NULL) {
-    // CE_FATAL(0, "/dev/urandom, your computer's built-in RNG, couldn't be opened for seeding!");
+    CE_FATAL(0, "/dev/urandom, your computer's built-in RNG, couldn't be opened for seeding!");
     return SG_CANT_OPEN;
   }
   unsigned long chrs_read = fread(dst, 1, size, file);
   if (chrs_read != size) {
     (void)fclose(file);
-    // CE_FATAL(0, "Not all bytes for a seed were generated upon request!");
+    CE_FATAL(0, "Not all bytes for a seed were generated upon request!");
     return SG_ERROR_DURING_GEN;
   }
   if (fclose(file)) {
-    // CE_FATAL(0, "/dev/urandom, your computer's built-in RNG, couldn't be closed!");
+    CE_FATAL(0, "/dev/urandom, your computer's built-in RNG, couldn't be closed!");
     return SG_CANT_CLOSE;
   }
   return SG_SUCCESS;
@@ -72,7 +72,7 @@ sg_error sg_get_time(int64_t * dst) {
   CE_ERROR(dst != NULL, "Destination ptr is NULL!");
   struct timespec tsp;
   if (timespec_get(&tsp, TIME_UTC) == 0) {
-    // CE_FATAL(0, "Can't get the timespec on this computer!");
+    CE_FATAL(0, "Can't get the timespec on this computer!");
     dst[0] = 0;
     dst[1] = 0;
     return SG_ERROR_DURING_GEN;
