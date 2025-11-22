@@ -1,5 +1,6 @@
-#include "../external/custom-errors/custom_errors.h"
-#include "../external/shishua/shishua.h"
+#include "../src/external/custom-errors/custom_errors.h"
+#include "../src/external/seed-gen/seed_gen.h"
+#include "../src/external/shishua/shishua.h"
 #include "external/stb/stb_image_write.h"
 #include <stdint.h>
 #include <stdio.h>
