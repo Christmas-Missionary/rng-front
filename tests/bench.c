@@ -3,16 +3,16 @@
 #include <stdio.h>
 #include <time.h>
 
-#define ITERS 2000000000UL
+#define ITERS 2000000000ULL
 
 static void print_time(const clock_t difference, const char * rng_used, int bytes_generated_per_iter) {
-  long double millis = (((long double)difference) / CLOCKS_PER_SEC) * 1000.0L;
-  printf("%s\n%Lf milliseconds\n%lu total clock cycles\n%f clock cycles per gen\n%f bytes per cycle\n\n",
+  long double seconds = (((long double)difference) / CLOCKS_PER_SEC);
+  long double micros = (double)(seconds * 1000000.0);
+  printf("%s\n%Lf seconds\n%Lf microseconds per gen\n%Lf bytes per microsecond\n\n",
          rng_used,
-         millis,
-         difference,
-         ((double)difference / ITERS),
-         (1 / ((double)difference / ITERS)) * bytes_generated_per_iter);
+         seconds,
+         (micros / ITERS),
+         (1 / (micros / ITERS)) * bytes_generated_per_iter);
 }
 
 int main(void) {
@@ -28,7 +28,7 @@ int main(void) {
   clock_t shi_diff = clock() - start;
   printf("%hhu\n", shishua_buf[127]);
 
-  printf("Given %lu iterations...\n\n", ITERS);
+  printf("Given %llu iterations...\n\n", ITERS);
   print_time(shi_diff, "Shishua (128)", 128);
 
   return 0;
