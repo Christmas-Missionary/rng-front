@@ -41,8 +41,7 @@ int main(void) {
     return 1;
   }
   prng_init(&state, shishua_seed);
-  prng_gen(&state, buf, (size_t)BUFFER_SIZE);
-  stbi_write_bmp("pic.bmp", SQUARE_LENGTH, SQUARE_LENGTH, 3, buf);
+  prng_gen(&state, buf, 128);
   printf("Each byte with the range being 10:\n");
   for (uint8_t i = 0; i < 10; i++) {
     printf("%d ", +(byte_reduce(buf[i], 10)));
@@ -58,6 +57,11 @@ int main(void) {
   for (uint8_t i = 15; i < 31; i += 4) {
     printf("%u ", reduce(merge_four_bytes(buf + i), 100000));
   }
-  printf("\n");
+  printf("\n`consistency.bmp` given the seed {0x243f6a8885a308d3, 1, 0xa409382229f31d00, 1}, should be the same as "
+         "sample.bmp\n");
+  const uint64_t consistency_seed[4] = {0x243f6a8885a308d3, 1, 0xa409382229f31d00, 1};
+  prng_init(&state, consistency_seed);
+  prng_gen(&state, buf, (size_t)BUFFER_SIZE);
+  stbi_write_bmp("consistency.bmp", SQUARE_LENGTH, SQUARE_LENGTH, 3, buf);
   return 0;
 }
