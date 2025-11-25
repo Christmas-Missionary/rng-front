@@ -15,6 +15,20 @@ static void print_time(const clock_t difference, const char * rng_used, int byte
          (1 / (micros / ITERS)) * bytes_generated_per_iter);
 }
 
+#if SHISHUA_TARGET == SHISHUA_TARGET_AVX2
+  #define TARGET_STR "AVX2 "
+#elif SHISHUA_TARGET == SHISHUA_TARGET_SSE2
+  #if defined(__SSSE3__) || defined(__AVX__)
+    #define TARGET_STR "SSSE3 "
+  #else
+    #define TARGET_STR "SSE2 "
+  #endif
+#elif SHISHUA_TARGET == SHISHUA_TARGET_NEON
+  #define TARGET_STR "NEON "
+#else
+  #define TARGET_STR "Portable "
+#endif
+
 int main(void) {
   uint8_t shishua_buf[128] = {0};
   prng_state state;
@@ -29,7 +43,7 @@ int main(void) {
   printf("%hhu\n", shishua_buf[127]);
 
   printf("Given %llu iterations...\n\n", ITERS);
-  print_time(shi_diff, "Shishua (128)", 128);
+  print_time(shi_diff, TARGET_STR "Shishua (128)", 128);
 
   return 0;
 }
