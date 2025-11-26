@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Christmas_Missionary - BSD Zero Clause License
+
 cmake_minimum_required(VERSION 3.25)
 
 # cmake -S tests -B build

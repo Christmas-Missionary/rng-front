@@ -1,3 +1,5 @@
+// Copyright (c) 2025 Christmas_Missionary - BSD Zero Clause License
+
 #include "../src/external/custom-errors/custom_errors.h"
 #include "../src/external/seed-gen/seed_gen.h"
 #include "../src/external/shishua/shishua.h"

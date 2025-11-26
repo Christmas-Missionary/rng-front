@@ -1,3 +1,7 @@
+/*
+Copyright (c) 2025 Christmas_Missionary - BSD Zero Clause License
+*/
+
 #ifndef RNGFRONT_RESTRICT_IS_MY_FAV_KEYWORD_GFK2WB
 #define RNGFRONT_RESTRICT_IS_MY_FAV_KEYWORD_GFK2WB
 

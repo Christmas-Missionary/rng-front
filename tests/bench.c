@@ -1,3 +1,5 @@
+// Copyright (c) 2025 Christmas_Missionary - BSD Zero Clause License
+
 #include "../src/external/shishua/shishua.h"
 #include <stdint.h>
 #include <stdio.h>
