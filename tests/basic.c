@@ -37,7 +37,7 @@ int main(void) {
     printf("Can't get time!\n");
     return 2;
   }
-  printf("The values from the time are: %lld and %lld\n\n", time_buf[0], time_buf[1]);
+  printf("The values from the time are: %lld and %lld\n\n", (long long)time_buf[0], (long long)time_buf[1]);
 
   uint8_t buf[BUFFER_SIZE] = {0};
   prng_state state = {0};
