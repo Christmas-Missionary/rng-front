@@ -30,17 +30,19 @@ static void print_time(const clock_t difference, const char * rng_used, int byte
 #endif
 
 int main(void) {
-  uint8_t shishua_buf[128] = {0};
+  uint8_t buf[128] = {0};
   prng_state state;
   uint64_t shishua_seed[4] = {0x243f6a8885a308d3, 1, 0xa409382229f31d00, 1};
   prng_init(&state, shishua_seed);
 
   clock_t start = clock();
   for (uint64_t i = 0; i < ITERS; i++) {
-    prng_gen(&state, shishua_buf, sizeof(shishua_buf));
+    prng_gen(&state, buf, sizeof(buf));
   }
   clock_t shi_diff = clock() - start;
-  printf("%hhu\n", shishua_buf[127]);
+
+  printf("Benchmark Consistency Test: Should be: {97, 121, 36, 254}: ");
+  printf("{%d, %d, %d, %d}\n", +buf[124], +buf[125], +buf[126], +buf[127]);
 
   printf("Given %llu iterations...\n\n", ITERS);
   print_time(shi_diff, TARGET_STR "Shishua (128)", 128);

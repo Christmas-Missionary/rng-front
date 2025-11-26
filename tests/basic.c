@@ -31,7 +31,7 @@ int main(void) {
     printf("Can't get time!\n");
     return 2;
   }
-  printf("The values from the time are: %lld and %lld\n", time_buf[0], time_buf[1]);
+  printf("The values from the time are: %lld and %lld\n\n", time_buf[0], time_buf[1]);
 
   uint8_t buf[BUFFER_SIZE] = {0};
   prng_state state = {0};
@@ -57,11 +57,15 @@ int main(void) {
   for (uint8_t i = 15; i < 31; i += 4) {
     printf("%u ", reduce(merge_four_bytes(buf + i), 100000));
   }
-  printf("\n`consistency.bmp` given the seed {0x243f6a8885a308d3, 1, 0xa409382229f31d00, 1}, should be the same as "
-         "sample.bmp\n");
   const uint64_t consistency_seed[4] = {0x243f6a8885a308d3, 1, 0xa409382229f31d00, 1};
   prng_init(&state, consistency_seed);
   prng_gen(&state, buf, (size_t)BUFFER_SIZE);
+  printf("\n\nGiven the seed {0x243f6a8885a308d3, 1, 0xa409382229f31d00, 1}:\n");
+  printf("Basic Consistency Test: Should be: {36, 109, 218, 224, 32, 169, 78, 35}\n");
+  printf("{%d, %d, %d, %d, %d, %d, %d, %d}", +buf[0], +buf[1], +buf[2], +buf[3], +buf[4], +buf[5], +buf[6], +buf[7]);
+
+  printf("\nBONUS: `consistency.bmp` should be the same as "
+         "sample.bmp\n");
   stbi_write_bmp("consistency.bmp", SQUARE_LENGTH, SQUARE_LENGTH, 3, buf);
   return 0;
 }
