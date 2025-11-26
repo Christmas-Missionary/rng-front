@@ -7,7 +7,11 @@
 #include <string.h>
 
 #define SQUARE_LENGTH 64
-#define BUFFER_SIZE (SQUARE_LENGTH * SQUARE_LENGTH * 3)
+#ifdef __EMSCRIPTEN__
+  #define BUFFER_SIZE 128
+#else
+  #define BUFFER_SIZE (SQUARE_LENGTH * SQUARE_LENGTH * 3)
+#endif
 
 static inline uint8_t byte_reduce(uint8_t val, uint8_t range) {
   CE_WARN(range > 1, "The range needs to be at least 2 for a valid mod reduction!");
@@ -64,8 +68,10 @@ int main(void) {
   printf("Basic Consistency Test: Should be: {36, 109, 218, 224, 32, 169, 78, 35}\n");
   printf("{%d, %d, %d, %d, %d, %d, %d, %d}", +buf[0], +buf[1], +buf[2], +buf[3], +buf[4], +buf[5], +buf[6], +buf[7]);
 
+#ifndef __EMSCRIPTEN__
   printf("\nBONUS: `consistency.bmp` should be the same as "
          "sample.bmp\n");
   stbi_write_bmp("consistency.bmp", SQUARE_LENGTH, SQUARE_LENGTH, 3, buf);
+#endif
   return 0;
 }

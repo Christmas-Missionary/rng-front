@@ -7,7 +7,9 @@
 #define SHISHUA_TARGET_NEON 3
 
 #ifndef SHISHUA_TARGET
-  #if defined(__AVX2__) && (defined(__x86_64__) || defined(_M_X64))
+  #if defined(__EMSCRIPTEN__)
+    #define SHISHUA_TARGET SHISHUA_TARGET_SCALAR // As of emcc version 4.0.10, produces the best wasm
+  #elif defined(__AVX2__) && (defined(__x86_64__) || defined(_M_X64))
     #define SHISHUA_TARGET SHISHUA_TARGET_AVX2
   #elif defined(__x86_64__) || defined(_M_X64) || defined(__SSE2__) || (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
     #define SHISHUA_TARGET SHISHUA_TARGET_SSE2
