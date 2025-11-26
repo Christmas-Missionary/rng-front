@@ -11,6 +11,6 @@
     #define restrict
   #endif
 
-#endif // If C++ or before C99
+#endif /* If C++ or before C99 */
 
-#endif // RNGFRONT_RESTRICT_IS_MY_FAV_KEYWORD_GFK2WB
+#endif /* RNGFRONT_RESTRICT_IS_MY_FAV_KEYWORD_GFK2WB */
