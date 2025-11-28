@@ -32,12 +32,15 @@ static inline uint32_t merge_four_bytes(const uint8_t * buf) {
 }
 
 int main(void) {
-  int64_t time_buf[2] = {0};
-  if (sg_get_time(time_buf) != SG_SUCCESS) {
-    printf("Can't get time!\n");
-    return 2;
+  {
+    const uint64_t ns_time = sg_get_time();
+    if (ns_time) {
+      printf("The amount of nanoseconds since the UNIX epoch is: %lld\n\n", (long long)ns_time);
+    } else {
+      printf("Can't get time!\n");
+      return 2;
+    }
   }
-  printf("The values from the time are: %lld and %lld\n\n", (long long)time_buf[0], (long long)time_buf[1]);
 
   uint8_t buf[BUFFER_SIZE] = {0};
   prng_state state = {0};

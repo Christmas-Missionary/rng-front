@@ -68,16 +68,11 @@ sg_error sg_generate_seed(void * dst, size_t size) {
 
 #include <time.h>
 
-sg_error sg_get_time(int64_t * dst) {
-  CE_ERROR(dst != NULL, "Destination ptr is NULL!");
+uint64_t sg_get_time(void) {
   struct timespec tsp;
   if (timespec_get(&tsp, TIME_UTC) == 0) {
     CE_FATAL(0, "Can't get the timespec on this computer!");
-    dst[0] = 0;
-    dst[1] = 0;
-    return SG_ERROR_DURING_GEN;
+    return 0;
   }
-  dst[0] = (int64_t)tsp.tv_sec;
-  dst[1] = (int64_t)tsp.tv_nsec;
-  return SG_SUCCESS;
+  return (uint64_t)tsp.tv_sec * 1000000000 + tsp.tv_nsec;
 }

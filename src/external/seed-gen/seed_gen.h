@@ -22,7 +22,7 @@ typedef enum sg_error {
 
 sg_error sg_generate_seed(void * dst, size_t size);
 
-sg_error sg_get_time(int64_t * dst);
+uint64_t sg_get_time(void);
 
 #ifdef __cplusplus
 }
